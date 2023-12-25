@@ -1,58 +1,173 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import Home from "./pages/Home";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import CartPage from "./pages/CartPage";
+import Checkout from "./pages/Checkout";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
+import ProtectedAdmin from "./features/auth/auth-components/ProtectedAdmin";
+import ForgotPassword from "./features/auth/auth-components/ForgotPassword";
+import { fetchCartProductsByUserIdAsync } from "./features/cart/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import PageNotFound from "./pages/PageNotFound";
+import OrderSuccess from "./pages/OrderSuccess";
+import Navbar from "./features/navbar/Navbar";
+import UserOrderPage from "./pages/UserOrderPage";
+import { fetchUserInfoAsync } from "./features/userInfo/userSlice";
+import UserProfilePage from "./pages/UserProfilePage";
+import AdminHome from "./pages/AdminHome";
+import Logout from "./features/auth/Logout";
+import AdminProductForm from "./features/adminPanel/components/AdminProductForm";
+import AdminOrders from "./features/adminPanel/components/AdminOrders";
+import StripeCheckoutPage from "./pages/StripeCheckoutPage";
+import AboutUsPage from "./pages/AboutUsPage";
+import { checkAuthAsync } from "./features/auth/authSlice";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+        <Home></Home>
+    ),
+  },
+  {
+    path: "/admin",
+    element: (
+      <ProtectedAdmin>
+        <AdminHome></AdminHome>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/login",
+    element: <LoginPage></LoginPage>,
+  },
+  {
+    path: "/signup",
+    element: <SignupPage></SignupPage>,
+  },
+  {
+    path: "/cart",
+    element: <CartPage></CartPage>,
+  },
+  {
+    path: "/checkout",
+    element: (
+    <Checkout></Checkout>
+    ),
+  },
+  {
+    path: "/productdetail/:id",
+    element: <ProductDetailsPage></ProductDetailsPage>,
+  },
+  {
+    path: "*",
+    element: <PageNotFound></PageNotFound>,
+  },
+  {
+    path: "/orderSuccess/:id",
+    element: (
+        <Navbar>
+          <OrderSuccess></OrderSuccess>
+        </Navbar>
+    ),
+  },
+  {
+    path: "/usersOrders",
+    element: (
+        <UserOrderPage></UserOrderPage>
+    ),
+  },
+  {
+    path: "/userProfile",
+    element: (
+    <UserProfilePage></UserProfilePage>
+    ),
+  },
+  {
+    path: "/logOut",
+    element: <Logout></Logout>,
+  },
+  {
+    path: "/forgotPassword",
+    element: <ForgotPassword></ForgotPassword>,
+  },
+  {
+    path: "/admin/adminProductForm",
+    element: <AdminProductForm></AdminProductForm>
+  },
+  {
+    path: "/admin/adminProductForm/edit/:id",
+    element: <AdminProductForm></AdminProductForm>
+  },
+  {
+    path: "/admin/adminOrders",
+    element: (
+      <ProtectedAdmin>
+        <AdminOrders></AdminOrders>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: "/admin/adminOrders/usersOrders/:id",
+    element: <UserOrderPage></UserOrderPage>,
+  },
+  {
+    path: "/StripeCheckoutPage",
+    element: (
+    <StripeCheckoutPage></StripeCheckoutPage>
+    ),
+  },
+  {
+    path: "/aboutUs",
+    element: <AboutUsPage></AboutUsPage>,
+  }
+]);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
-}
+  const dispatch = useDispatch();
+  const userInfo = useSelector(state => state.user.userInfo);
+  const authUser = useSelector(state => state.auth.loggedInUser);
+  const authChecked = useSelector(state => state.auth.checkAuth);
+  const authStatus = useSelector(state => state.auth.status);
+  const cartItems = useSelector((state) => state.cart.items);
+  const StatusQty = useSelector((state) => state.cart.statusQty);
+  const cartItemsLength = cartItems ? cartItems.length : 0; 
+
+  useEffect(() => {
+    dispatch(checkAuthAsync())
+  }, [dispatch]);
+  useEffect(() => {
+    dispatch(checkAuthAsync())
+  }, [authStatus]);
+  useEffect(() => {
+    if(authUser){
+      dispatch(fetchUserInfoAsync());
+    }
+  }, [dispatch, authUser]);
+  
+  useEffect(() => {
+    if(userInfo){
+    dispatch(fetchCartProductsByUserIdAsync(userInfo.id));
+    }
+  }, [dispatch, cartItemsLength, userInfo, StatusQty]);
+    return (
+      <div>
+        {authChecked && <RouterProvider router={router} />}
+      </div>
+    )
+  }
+
+  // return (
+  //   <div>
+  //     {(userInfo && cartItemsLength) || (["/login", "/signup"].includes(window.location.pathname) && authUser===undefined) && (
+  //       <RouterProvider router={router} />
+  //     )}
+  //   </div>
+  // );
+  
+  
 
 export default App;
