@@ -4,7 +4,7 @@ export function fetchUserInfo(token) {
         method: 'GET',
         headers: {
           "content-type": "application/json",
-          "auth-token": token     
+          "auth-token": token
         }})
       const data = await response.json();
       resolve({data});

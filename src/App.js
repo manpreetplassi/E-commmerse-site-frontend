@@ -24,6 +24,7 @@ import AdminOrders from "./features/adminPanel/components/AdminOrders";
 import StripeCheckoutPage from "./pages/StripeCheckoutPage";
 import AboutUsPage from "./pages/AboutUsPage";
 import { checkAuthAsync } from "./features/auth/authSlice";
+import { Helmet } from 'react-helmet';
 
 const router = createBrowserRouter([
   {
@@ -155,6 +156,12 @@ function App() {
   }, [dispatch, cartItemsLength, userInfo, StatusQty]);
     return (
       <div>
+        <Helmet>
+        <title>Manu saini inzab ecommerse site</title>
+        <meta name="description" content="Manu saini inzab ecommerse site. You will get all the garden." />
+        <meta property="og:title" content="My Page Title for Social Sharing" />
+        <meta property="og:description" content="Manu saini inzab ecommerse site" />
+        </Helmet>
         {authChecked && <RouterProvider router={router} />}
       </div>
     )
